@@ -1,0 +1,105 @@
+
+
+**Part B.1 - Booking Reference Generator**
+
+To enhance the system, each seat booking must generate a unique 8-character alphanumeric booking reference. Below is the implementation logic:
+
+### Algorithm Description:
+
+* A combination of uppercase letters and digits is used.
+* A reference is generated randomly using Python’s `random.choices`.
+* The system maintains a set of previously used references to ensure uniqueness.
+
+```python
+import random
+import string
+
+used_references = set()
+
+def generate_booking_reference():
+    while True:
+        ref = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        if ref not in used_references:
+            used_references.add(ref)
+            return ref
+```
+
+Each time a new booking is made, `generate_booking_reference()` is called to assign a unique identifier instead of "R".
+
+---
+
+**Part B.2 - Database Integration with SQLite**
+
+Customer data is stored in a local SQLite database when a seat is booked. The database contains a table `bookings` with the following fields:
+
+* `reference` (TEXT, PRIMARY KEY)
+* `passport_number` (TEXT)
+* `first_name` (TEXT)
+* `last_name` (TEXT)
+* `seat` (TEXT)
+
+### Database Setup and Integration Code:
+
+```python
+import sqlite3
+
+# Connect to SQLite database
+conn = sqlite3.connect('airline.db')
+cursor = conn.cursor()
+
+# Create table if it doesn't exist
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS bookings (
+    reference TEXT PRIMARY KEY,
+    passport_number TEXT,
+    first_name TEXT,
+    last_name TEXT,
+    seat TEXT
+)
+''')
+conn.commit()
+
+# Save booking
+def save_booking(reference, passport, first_name, last_name, seat):
+    cursor.execute("INSERT INTO bookings VALUES (?, ?, ?, ?, ?)",
+                   (reference, passport, first_name, last_name, seat))
+    conn.commit()
+
+# Delete booking
+def delete_booking(seat):
+    cursor.execute("DELETE FROM bookings WHERE seat = ?", (seat,))
+    conn.commit()
+```
+
+### Refactored Booking Function:
+
+```python
+def book_seat():
+    seat = input("Enter seat to book: ").upper()
+    if seat_map.get(seat) == 'F':
+        passport = input("Enter passport number: ")
+        first = input("Enter first name: ")
+        last = input("Enter last name: ")
+        reference = generate_booking_reference()
+        seat_map[seat] = reference
+        save_booking(reference, passport, first, last, seat)
+        print(f"Seat {seat} booked successfully with reference: {reference}")
+    else:
+        print(f"Cannot book seat {seat}: Currently {seat_map.get(seat)}")
+```
+
+### Refactored Free Seat Function:
+
+```python
+def free_seat():
+    seat = input("Enter seat to free: ").upper()
+    if seat in seat_map and seat_map[seat] not in ['F', 'X', 'S']:
+        seat_map[seat] = 'F'
+        delete_booking(seat)
+        print(f"Seat {seat} has been freed and booking deleted.")
+    else:
+        print("Invalid or unbooked seat.")
+```
+
+---
+
