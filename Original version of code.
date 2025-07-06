@@ -1,0 +1,93 @@
+# Apache Airlines Seat Booking System - Part A
+
+
+# Define seat map: 80 rows, 6 columns (A-F) with aisle 'X' and storage 'S'
+rows = 80
+cols = ['A', 'B', 'C', 'D', 'E', 'F']
+seat_map = {}
+
+# Initialize seat map with 'F' (free), 'X' (aisle), and 'S' (storage)
+for row in range(1, rows + 1):
+    for col in cols:
+        seat = f"{row}{col}"
+        if col in ['D', 'E', 'F'] and row > 76:
+            seat_map[seat] = 'S'
+        elif col == 'D' and row in range(40, 45):  # demo aisle case
+            seat_map[seat] = 'X'
+        else:
+            seat_map[seat] = 'F'
+
+# Function to display menu
+def display_menu():
+    print("\nApache Airlines Seat Booking System")
+    print("1. Check availability of seat")
+    print("2. Book a seat")
+    print("3. Free a seat")
+    print("4. Show booking status")
+    print("5. Exit program")
+
+# Function to check availability
+def check_seat():
+    seat = input("Enter seat (e.g., 12C): ").upper()
+    if seat in seat_map:
+        status = seat_map[seat]
+        if status == 'F':
+            print(f"Seat {seat} is FREE.")
+        elif status == 'R':
+            print(f"Seat {seat} is RESERVED.")
+        elif status in ['X', 'S']:
+            print(f"Seat {seat} is NOT BOOKABLE ({status}).")
+        else:
+            print(f"Seat {seat} is BOOKED with reference {status}.")
+    else:
+        print("Invalid seat number.")
+
+# Function to book a seat
+def book_seat():
+    seat = input("Enter seat to book: ").upper()
+    if seat_map.get(seat) == 'F':
+        seat_map[seat] = 'R'
+        print(f"Seat {seat} booked successfully.")
+    elif seat in seat_map:
+        print(f"Cannot book seat {seat}: Currently {seat_map[seat]}.")
+    else:
+        print("Invalid seat.")
+
+# Function to free a seat
+def free_seat():
+    seat = input("Enter seat to free: ").upper()
+    if seat_map.get(seat) == 'R':
+        seat_map[seat] = 'F'
+        print(f"Seat {seat} is now free.")
+    elif seat in seat_map:
+        print(f"Seat {seat} is not currently booked.")
+    else:
+        print("Invalid seat.")
+
+# Function to show seat booking status
+def show_status():
+    print("\nCurrent Seat Map Summary:")
+    for row in range(1, rows + 1):
+        status_row = []
+        for col in cols:
+            seat = f"{row}{col}"
+            status_row.append(seat_map.get(seat, ' '))
+        print(f"Row {row:02}: {status_row}")
+
+# Main loop
+while True:
+    display_menu()
+    choice = input("Select an option (1-5): ")
+    if choice == '1':
+        check_seat()
+    elif choice == '2':
+        book_seat()
+    elif choice == '3':
+        free_seat()
+    elif choice == '4':
+        show_status()
+    elif choice == '5':
+        print("Exiting program. Goodbye!")
+        break
+    else:
+        print("Invalid selection. Please try again.")
